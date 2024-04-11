@@ -8,8 +8,8 @@ use tokio::{
 use tracing::*;
 
 #[derive(Debug)]
-pub(crate) struct ServiceStopper {
-    pub(crate) services_state: Arc<RwLock<HashMap<String, Instant>>>,
+pub(super) struct ServiceStopper {
+    pub(super) services_state: Arc<RwLock<HashMap<String, Instant>>>,
 }
 #[async_trait::async_trait]
 impl BackgroundService for ServiceStopper {
@@ -24,6 +24,9 @@ impl BackgroundService for ServiceStopper {
                     let now = Instant::now();
                     if now - *instant > Duration::from_secs(30) {
                         debug!("stopping service {service}");
+
+                        // TODO: stop service
+
                         false
                     } else {
                         true

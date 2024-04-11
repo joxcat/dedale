@@ -23,11 +23,12 @@ use tokio::sync::{
 };
 use tracing::*;
 
+mod backend;
 mod service_starter;
 mod service_stopper;
 
 #[derive(Debug)]
-pub struct Proxy {
+pub(super) struct Proxy {
     services_starter: Sender<(String, oneshot::Sender<String>)>,
     concurrent_req_count: AtomicU64,
     default_service: Option<String>,
@@ -74,10 +75,10 @@ impl Proxy {
 }
 
 #[derive(Debug)]
-pub struct ProxyCtx {
-    pub host: Option<String>,
-    pub tx_service_started: Option<oneshot::Sender<String>>,
-    pub rx_service_started: Option<oneshot::Receiver<String>>,
+pub(super) struct ProxyCtx {
+    host: Option<String>,
+    tx_service_started: Option<oneshot::Sender<String>>,
+    rx_service_started: Option<oneshot::Receiver<String>>,
 }
 
 #[async_trait::async_trait]
@@ -132,7 +133,7 @@ impl ProxyHttp for Proxy {
             debug!("waiting for {host} to be ready");
             // this function will run only once after initialization
             // so we can safely take and unwrap the receiver
-            // TODO: Timeout
+            // TODO: Handle timeout
             let host = ctx.rx_service_started.take().unwrap().await.unwrap();
             debug!("done waiting for {host} to be ready");
 
