@@ -19,6 +19,7 @@ pub(super) trait ProxyServiceBackend {
         Self: Sized;
 
     /// Should return the state of the backend
+    #[allow(clippy::unused_async)]
     async fn status(&mut self, service: &str) -> pingora::Result<BackendState> {
         warn!(
             "get status of {service} in {} status is not implemented",
@@ -28,11 +29,13 @@ pub(super) trait ProxyServiceBackend {
     }
     /// Should start the service
     /// must be callable multiple times without error
+    #[allow(clippy::unused_async)]
     async fn start(&mut self, service: &str) -> pingora::Result<String> {
         todo!("start {service} of {} is not implemented", Self::IDENT);
     }
     /// Should stop the service
     /// must be callable multiple times without error
+    #[allow(clippy::unused_async)]
     async fn stop(&mut self, service: &str) -> pingora::Result<String> {
         todo!("stop {service} of {} is not implemented", Self::IDENT);
     }

@@ -5,7 +5,7 @@ use tokio::{
     sync::{mpsc::Receiver, oneshot, RwLock},
     time::Instant,
 };
-use tracing::*;
+use tracing::{debug, info};
 
 use super::backend::{BackendState, DockerServiceBackend, ProxyServiceBackend};
 
@@ -47,7 +47,7 @@ impl BackgroundService for ServiceStarter {
                     .insert(required_service.clone(), Instant::now());
 
                 // this should never panic because we just inserted the sender
-                started.send(format!("localhost:8080")).unwrap();
+                started.send("localhost:8080".to_string()).unwrap();
             }
         }
 

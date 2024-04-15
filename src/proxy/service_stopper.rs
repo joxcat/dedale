@@ -5,7 +5,7 @@ use tokio::{
     sync::RwLock,
     time::{sleep, Instant},
 };
-use tracing::*;
+use tracing::{debug, info};
 
 use super::backend::{BackendState, DockerServiceBackend, ProxyServiceBackend};
 
@@ -35,7 +35,7 @@ impl BackgroundService for ServiceStopper {
                 });
 
             let mut backend = DockerServiceBackend::new_backend().await.unwrap();
-            for service in services_to_stop.into_iter() {
+            for service in services_to_stop {
                 debug!("stopping service {service}");
                 if backend
                     .status("nginx")

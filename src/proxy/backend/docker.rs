@@ -32,8 +32,10 @@ impl ProxyServiceBackend for DockerServiceBackend {
                     i.state
                         .map_or(BackendState::NotFound, |state| match state.status {
                             Some(ContainerStateStatusEnum::RUNNING) => BackendState::Started,
-                            Some(ContainerStateStatusEnum::CREATED)
-                            | Some(ContainerStateStatusEnum::PAUSED) => BackendState::Stopped,
+                            Some(
+                                ContainerStateStatusEnum::CREATED
+                                | ContainerStateStatusEnum::PAUSED,
+                            ) => BackendState::Stopped,
                             _ => BackendState::NotFound,
                         })
                 },

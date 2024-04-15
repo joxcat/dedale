@@ -25,9 +25,9 @@ use tokio::{
     },
     time::sleep,
 };
-use tracing::*;
+use tracing::{debug, info, warn};
 
-pub(self) mod backend;
+pub mod backend;
 mod service_starter;
 mod service_stopper;
 
@@ -50,7 +50,7 @@ impl Proxy {
 
         let mut proxy = http_proxy_service(
             &server.configuration,
-            Proxy {
+            Self {
                 services_starter: tx_need_service,
                 concurrent_req_count: AtomicU64::new(0),
                 default_service: default_service.map(str::to_string),
@@ -140,7 +140,7 @@ impl ProxyHttp for Proxy {
         ctx: &mut Self::CTX,
         client_reused: bool,
     ) -> Box<pingora::Error> {
-        let mut e = e.more_context(format!("Peer: {}", peer));
+        let mut e = e.more_context(format!("Peer: {peer}"));
 
         if ctx.retry_count < MAX_RETRY_COUNT
             && e.cause
