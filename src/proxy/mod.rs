@@ -5,6 +5,7 @@ use std::{
         atomic::{AtomicU64, Ordering},
         Arc,
     },
+    time::Duration,
 };
 
 use pingora::{
@@ -17,15 +18,20 @@ use pingora::{
 };
 use service_starter::ServiceStarter;
 use service_stopper::ServiceStopper;
-use tokio::sync::{
-    mpsc::{channel, Sender},
-    oneshot, RwLock,
+use tokio::{
+    sync::{
+        mpsc::{channel, Sender},
+        oneshot, RwLock,
+    },
+    time::sleep,
 };
 use tracing::*;
 
-mod backend;
+pub(self) mod backend;
 mod service_starter;
 mod service_stopper;
+
+const MAX_RETRY_COUNT: u16 = 3;
 
 #[derive(Debug)]
 pub(super) struct Proxy {
@@ -79,6 +85,7 @@ pub(super) struct ProxyCtx {
     host: Option<String>,
     tx_service_started: Option<oneshot::Sender<String>>,
     rx_service_started: Option<oneshot::Receiver<String>>,
+    retry_count: u16,
 }
 
 #[async_trait::async_trait]
@@ -91,6 +98,7 @@ impl ProxyHttp for Proxy {
             host: None,
             tx_service_started: Some(tx_service_started),
             rx_service_started: Some(rx_service_started),
+            retry_count: 0,
         }
     }
 
@@ -108,7 +116,7 @@ impl ProxyHttp for Proxy {
         if let Some(host) = session.get_header("host").and_then(|h| {
             h.to_str()
                 .ok()
-                .and_then(|h| if h.contains(":") { None } else { Some(h) })
+                .and_then(|h| if false { None } else { Some(h) })
         }) {
             let host = host.to_string();
             ctx.host = Some(host.clone());
@@ -124,12 +132,46 @@ impl ProxyHttp for Proxy {
     }
 
     #[tracing::instrument(skip_all)]
+    fn error_while_proxy(
+        &self,
+        peer: &HttpPeer,
+        session: &mut Session,
+        e: Box<pingora::Error>,
+        ctx: &mut Self::CTX,
+        client_reused: bool,
+    ) -> Box<pingora::Error> {
+        let mut e = e.more_context(format!("Peer: {}", peer));
+
+        if ctx.retry_count < MAX_RETRY_COUNT
+            && e.cause
+                .as_ref()
+                .is_some_and(|e| e.to_string().contains("Connection reset by peer"))
+        {
+            ctx.retry_count += 1;
+            info!("retrying connection (count: {})", ctx.retry_count);
+            e.set_retry(true);
+        }
+
+        // only reused client connections where retry buffer is not truncated
+        e.retry
+            .decide_reuse(client_reused && !session.as_ref().retry_buffer_truncated());
+
+        e
+    }
+
+    #[tracing::instrument(skip_all)]
     async fn upstream_peer(
         &self,
         _session: &mut Session,
         ctx: &mut Self::CTX,
     ) -> pingora::Result<Box<HttpPeer>> {
-        let host = if let Some(ref host) = ctx.host {
+        let host = if ctx.retry_count > 0 {
+            // We sleep here to give some time before retrying
+            // We can sleep because we use the tokio version
+            sleep(Duration::from_millis(10)).await;
+            debug!("retrying with same host");
+            ctx.host.clone().unwrap()
+        } else if let Some(ref host) = ctx.host {
             debug!("waiting for {host} to be ready");
             // this function will run only once after initialization
             // so we can safely take and unwrap the receiver
@@ -137,8 +179,14 @@ impl ProxyHttp for Proxy {
             let host = ctx.rx_service_started.take().unwrap().await.unwrap();
             debug!("done waiting for {host} to be ready");
 
+            // Update target host in ctx
+            ctx.host = Some(host.clone());
+
             host
         } else if let Some(ref host) = self.default_service {
+            // Update target host in ctx
+            ctx.host = Some(host.clone());
+
             host.clone()
         } else {
             return Err(pingora::Error::explain(

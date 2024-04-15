@@ -1,25 +1,39 @@
+#[cfg(feature = "backend_docker")]
 mod docker;
+#[cfg(feature = "backend_docker")]
 pub(super) use docker::*;
 use tracing::warn;
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum BackendState {
+    Started,
+    Stopped,
+    NotFound,
+}
 
 pub(super) trait ProxyServiceBackend {
     const IDENT: &'static str;
 
-    /// Should return true if the service is running
-    /// by default it always returns false
-    async fn status(service: &str) -> pingora::Result<bool> {
-        warn!("get status of {service} in {} status is not implemented", Self::IDENT);
-        // Will always return false
-        Ok(false)
+    async fn new_backend() -> pingora::Result<Self>
+    where
+        Self: Sized;
+
+    /// Should return the state of the backend
+    async fn status(&mut self, service: &str) -> pingora::Result<BackendState> {
+        warn!(
+            "get status of {service} in {} status is not implemented",
+            Self::IDENT
+        );
+        Ok(BackendState::NotFound)
     }
     /// Should start the service
     /// must be callable multiple times without error
-    async fn start(service: &str) -> pingora::Result<String> {
+    async fn start(&mut self, service: &str) -> pingora::Result<String> {
         todo!("start {service} of {} is not implemented", Self::IDENT);
     }
     /// Should stop the service
     /// must be callable multiple times without error
-    async fn stop(service: &str) -> pingora::Result<()> {
+    async fn stop(&mut self, service: &str) -> pingora::Result<String> {
         todo!("stop {service} of {} is not implemented", Self::IDENT);
     }
 }
