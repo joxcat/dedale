@@ -15,10 +15,7 @@ use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
 use crate::{
-    controllers, initializers,
-    models::_entities::users,
-    tasks,
-    workers::downloader::DownloadWorker,
+    controllers, initializers, models::_entities::users, tasks, workers::downloader::DownloadWorker,
 };
 
 pub struct App;
