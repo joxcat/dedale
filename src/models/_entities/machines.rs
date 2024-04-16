@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "apps")]
+#[sea_orm(table_name = "machines")]
 pub struct Model {
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
@@ -12,31 +12,23 @@ pub struct Model {
     pub id: i32,
     #[sea_orm(unique)]
     pub name: String,
-    pub user_id: i32,
+    pub app_id: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::machines::Entity")]
-    Machines,
     #[sea_orm(
-        belongs_to = "super::users::Entity",
-        from = "Column::UserId",
-        to = "super::users::Column::Id",
+        belongs_to = "super::apps::Entity",
+        from = "Column::AppId",
+        to = "super::apps::Column::Id",
         on_update = "Cascade",
         on_delete = "Cascade"
     )]
-    Users,
+    Apps,
 }
 
-impl Related<super::machines::Entity> for Entity {
+impl Related<super::apps::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Machines.def()
-    }
-}
-
-impl Related<super::users::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Users.def()
+        Relation::Apps.def()
     }
 }

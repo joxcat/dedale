@@ -3,4 +3,5 @@
 pub mod prelude;
 
 pub mod apps;
+pub mod machines;
 pub mod users;
