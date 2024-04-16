@@ -10,6 +10,6 @@
 
 - [ ] Scale services between 0 and 1
 - [ ] Build Dockerfiles (based on buildpacks)
-- [ ] CLI following the `fly` one for same features
+- [ ] CLI following the `flyctl` one for same features
 - [ ] Web UI to manage apps
 - [ ] Provision certificates
