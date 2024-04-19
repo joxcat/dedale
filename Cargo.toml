@@ -7,8 +7,9 @@ edition = "2021"
 default-run = "dedale-server"
 
 [features]
-default = ["backend_docker"]
-backend_docker = ["bollard"]
+default = ["backend_docker", "client_cli"]
+backend_docker = ["dep:bollard"]
+client_cli = ["dep:clap"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -48,16 +49,17 @@ bollard = { version = "0.16", optional = true }
 
 # HACK: https://github.com/launchbadge/sqlx/issues/3189
 time = "=0.3.34"
+clap = { version = "4.5.4", features = ["env", "derive"], optional = true }
 
 [[bin]]
 name = "dedale-server"
-path = "src/bin/main.rs"
+path = "src/bin/dedale_server.rs"
 required-features = []
 
 [[bin]]
 name = "dedalectl"
-path = "src/bin/dedalectl.rs"
-required-features = []
+path = "src/bin/dedalectl/main.rs"
+required-features = ["client_cli"]
 
 [dev-dependencies]
 serial_test = "2.0"
