@@ -1,33 +1,38 @@
-# SaaS Frontend
+# create-svelte
 
-# Development
+Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
-To get started with the development of the SaaS frontend, follow these steps:
+## Creating a project
 
-### 1. Install Packages
+If you're seeing this, you've probably already done this step. Congrats!
 
-Use the following command to install the required packages using pnpm:
+```bash
+# create a new project in the current directory
+npm create svelte@latest
 
-```sh
-pnpm install
+# create a new project in my-app
+npm create svelte@latest my-app
 ```
 
-### 2. Run in Development Mode
+## Developing
 
-Once the packages are installed, run your frontend application in development mode with the following command:
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-```sh
-pnpm dev
+```bash
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-This will start the development frontend server serving via vit
+## Building
 
-### 3. Build The application
+To create a production version of your app:
 
-To build your application run the following command:
-
-```sh
-pnpm build
+```bash
+npm run build
 ```
 
-After the build `dist` folder is ready to served by loco. run loco `cargo loco start` and the frontend application will served via Loco
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
