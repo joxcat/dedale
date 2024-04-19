@@ -27,7 +27,7 @@ mod apps {
     )]
     /// The APPS commands focus on managing your Dedale applications. Start with the CREATE command to register your application.
     /// The LIST command will list all currently registered applications.
-    pub(super) enum Command {
+    pub enum Command {
         Create,
         List,
         Destroy
@@ -41,7 +41,7 @@ mod machine {
     #[clap(visible_aliases = ["machines", "m"], verbatim_doc_comment)]
     /// Manage Dedale Machines. 
     /// Dedale Machines are super-slow, or at least not lighting fast VMs that can be created, and then "quickly" started and stopped as needed with dedalectl commands or with the Machines REST dedale.
-    pub(super) enum Command {
+    pub enum Command {
         Create,
         List,
         Destroy,
