@@ -72,11 +72,8 @@ impl Proxy {
         server.add_service(proxy);
         server.add_service(start_service_handler);
         server.add_service(stop_service_handler);
+        
         server.run_forever();
-
-        info!("proxy shutting down");
-
-        Ok(())
     }
 }
 

@@ -8,7 +8,5 @@ async fn current(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Respo
 }
 
 pub fn routes() -> Routes {
-    Routes::new()
-        .prefix("user")
-        .add("/current", get(current))
+    Routes::new().prefix("user").add("/current", get(current))
 }

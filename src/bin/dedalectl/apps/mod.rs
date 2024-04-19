@@ -8,8 +8,11 @@ use clap::Parser;
 )]
 /// The APPS commands focus on managing your Dedale applications. Start with the CREATE command to register your application.
 /// The LIST command will list all currently registered applications.
-pub(super) enum Command {
+pub enum Command {
+    /// Create a new application
     Create,
+    /// Permanently destroys an app
+    Destroy,
+    /// List applications
     List,
-    Destroy
 }
